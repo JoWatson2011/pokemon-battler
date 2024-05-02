@@ -1,14 +1,14 @@
 class Pokemon {
   constructor(name = "", move = "tackle") {
     this.name = name;
-    this.hitPoints = 10;
-    this.attackDamage = 0;
+    this.hitPoints = 20;
+    this.attackDamage = 5;
     this.move = move;
   }
 
   takeDamage(damage) {
     this.hitPoints = this.hitPoints - damage;
-    return `${damage} damage taken! ${this.hitPoints} HP remaining!`;
+    return `${this.name} took ${damage} damage! ${this.hitPoints} HP remaining!`;
   }
 
   useMove(move) {
@@ -17,7 +17,7 @@ class Pokemon {
   }
 
   hasFainted() {
-    return this.hitPoints === 0;
+    return this.hitPoints <= 0;
   }
 }
 
@@ -165,25 +165,54 @@ class Trainer {
 class Battle {
   constructor(pokemon1, pokemon2) {
     this.turn = 1; // if odd, pokemon1 turn; if even, pokemon2 turn
-    this.pokemon1 = pokemon1;
-    this.pokemon2 = pokemon2;
+    this._pokemon1 = pokemon1;
+    this._pokemon2 = pokemon2;
     this.activePokemon = pokemon1;
     this.defendingPokemon = pokemon2;
+    this.battleOver = false;
+    this.winningPokemon = {}
   }
 
   fight() {
-    this.attack(this.activePokemon);
+    if (this.battleOver) return this.winningPokemon;
+
+    const turnAttackDamage = this.attack();
+    this.defend(turnAttackDamage);
+
+    if (this.defendingPokemon.hasFainted()) {
+      console.log(
+        `${this.defendingPokemon.name} has fainted! ${this.activePokemon.name} wins!`
+      );
+      this.battleOver = true;
+      this.winningPokemon = this.activePokemon;
+      return this.winningPokemon;
+    } else {
+      this.turn++;
+      this.activePokemon =
+        this.turn % 2 === 0 ? this._pokemon2 : this._pokemon1;
+      this.defendingPokemon =
+        this.turn % 2 === 0 ? this._pokemon1 : this._pokemon2;
+    }
     // This is the last thing to do
-    this.turn++;
-    this.activePokemon = this.turn % 2 === 0 ? this.pokemon2 : this.pokemon1;
-    this.defendingPokemon = this.turn % 2 === 0 ? this.pokemon1 : this.pokemon2;
   }
 
-  attack(activePokemon) {}
+  attack() {
+    return this.activePokemon.useMove();
+  }
 
-  defend(defendingPokemon) {}
+  defend(attackDamage) {
+    let damage = attackDamage;
 
-  checkIfFainted() {}
+    if (this.defendingPokemon.isEffectiveAgainst(this.activePokemon)) {
+      damage *= 0.75;
+      console.log("It's not very effective...");
+    }
+    if (this.defendingPokemon.isWeakTo(this.activePokemon)) {
+      damage *= 1.25;
+      console.log("It's super effective!");
+    }
+    this.defendingPokemon.takeDamage(damage);
+  }
 }
 
 module.exports = {

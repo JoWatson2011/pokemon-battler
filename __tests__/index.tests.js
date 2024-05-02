@@ -17,8 +17,8 @@ describe("Pokemon()", () => {
     test("When the Pokemon() constructor is invoked, it should create a new instance with name, hitPoints, attackDamage and move properties", () => {
       const newPokemon = new Pokemon();
       expect(newPokemon.name).toBe("");
-      expect(newPokemon.hitPoints).toBe(10);
-      expect(newPokemon.attackDamage).toBe(0);
+      expect(newPokemon.hitPoints).toBe(20);
+      expect(newPokemon.attackDamage).toBe(5);
       expect(newPokemon.move).toBe("tackle");
     });
     test("Pokemon() constructor can take arguments for Pokemon name", () => {
@@ -32,15 +32,15 @@ describe("Pokemon()", () => {
         const newPokemon = new Pokemon();
 
         newPokemon.takeDamage(3);
-        expect(newPokemon.hitPoints).toBe(7);
+        expect(newPokemon.hitPoints).toBe(17);
 
         newPokemon.takeDamage(0);
-        expect(newPokemon.hitPoints).toBe(7);
+        expect(newPokemon.hitPoints).toBe(17);
       });
       test("Returns a message stating how much damage was taken and the remaining HP", () => {
-        const newPokemon = new Pokemon();
+        const newPokemon = new Pokemon("Togepi");
         expect(newPokemon.takeDamage(3)).toBe(
-          "3 damage taken! 7 HP remaining!"
+          "Togepi took 3 damage! 17 HP remaining!"
         );
       });
     });
@@ -58,7 +58,7 @@ describe("Pokemon()", () => {
       });
       test("Returns false if pokemon hit points are 0", () => {
         const newPokemon = new Pokemon();
-        newPokemon.takeDamage(10);
+        newPokemon.takeDamage(20);
         expect(newPokemon.hasFainted()).toBe(true);
       });
     });
@@ -298,6 +298,7 @@ describe("Pokeball()", () => {
 
         //expect(logSpy).toHaveBeenCalledWith("You caught Rattata!");
         expect(logSpy).toHaveBeenCalledWith("empty...");
+        logSpy.mockRestore();
       });
     });
     describe("isEmpty()", () => {
@@ -377,6 +378,7 @@ describe("Trainer()", () => {
         youngesterJoey.catch(rattata);
 
         expect(logSpy).toHaveBeenCalledWith("Party full!");
+        logSpy.mockRestore();
       });
     });
     describe("getPokemon()", () => {
@@ -394,6 +396,7 @@ describe("Trainer()", () => {
         const youngesterJoey = new Trainer();
         youngesterJoey.getPokemon("Rattata");
         expect(logSpy).toHaveBeenCalledWith("Pokemon is not in party...");
+        logSpy.mockRestore();
       });
     });
   });
@@ -402,31 +405,77 @@ describe("Trainer()", () => {
 
 describe("Battle()", () => {
   // call pokemon class instances here, can use them all through this block
-  const charmander = new Charmander();
-  const squirtle = new Squirtle();
+  let charmander;
+  let squirtle;
+  beforeEach(() => {
+    console.log("new pokemon appear!");
+    charmander = new Charmander();
+    squirtle = new Squirtle();
+  });
 
   describe("Battle() constructor", () => {
     test("An instance of Battle() takes two pokemon, assigns them to properties pokemon1/activePokemon and pokemon2/defendingPokemon, and also has property of turn (which starts at 1)", () => {
       const battle = new Battle(charmander, squirtle);
       expect(battle.turn).toBe(1);
-      expect(battle.pokemon1).toEqual(charmander);
-      expect(battle.pokemon2).toEqual(squirtle);
+      expect(battle._pokemon1).toEqual(charmander);
+      expect(battle._pokemon2).toEqual(squirtle);
       expect(battle.activePokemon).toEqual(charmander);
       expect(battle.defendingPokemon).toEqual(squirtle);
     });
   });
   describe("Battle() methods", () => {
     describe("fight()", () => {
-      test("Calls attack with the activePokemon", () => {
+      test("Calls attack() with the activePokemon", () => {
         const battle = new Battle(charmander, squirtle);
         const battleSpy = jest.spyOn(battle, "attack");
         battle.fight();
         expect(battleSpy).toHaveBeenCalled();
+        battleSpy.mockRestore();
+      });
+      test("Calls defend() with the defendingPokemon", () => {
+        const battle = new Battle(charmander, squirtle);
+        const battleSpy = jest.spyOn(battle, "defend");
+        battle.fight();
+        expect(battleSpy).toHaveBeenCalled();
+        console.log(battleSpy);
+        battleSpy.mockRestore();
+      });
+      test("Ends battle by returning activePokemon if defending pokemon has fainted", () => {
+        const battle = new Battle(squirtle, charmander);
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        console.log(charmander.hasFainted());
+        expect(battle.fight()).toEqual(squirtle);
+      });
+      test("When battle ends, console.log message saying which pokemon has won the battle", () => {
+        console.clear();
+        const logSpy = jest.spyOn(console, "log");
+        const battle = new Battle(squirtle, charmander);
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        battle.fight();
+        expect(logSpy).toHaveBeenCalledWith(
+          "Charmander has fainted! Squirtle wins!"
+        );
       });
       test("At the end of the pokemon1's turn, adds 1 to the turn property", () => {
         const battle = new Battle(charmander, squirtle);
         battle.fight();
         expect(battle.turn).toBe(2);
+        battle.fight();
+        expect(battle.turn).toBe(3);
+        battle.fight();
+        expect(battle.turn).toBe(4);
       });
       test("When turn is odd, pokemon1 is the active pokemon; when turn is even, pokemon 2 is the active pokemon. Vice versa for defending pokemon", () => {
         const battle = new Battle(charmander, squirtle);
@@ -435,29 +484,47 @@ describe("Battle()", () => {
         battle.fight();
         expect(battle.activePokemon).toEqual(squirtle);
         expect(battle.defendingPokemon).toEqual(charmander);
+        battle.fight();
+        expect(battle.activePokemon).toEqual(charmander);
+        expect(battle.defendingPokemon).toEqual(squirtle);
       });
     });
     describe("attack()", () => {
-      test.todo(
-        "An attack by the active pokemon deducts attack damage from the defending pokemon's HP"
-      );
-      test.todo(
-        "Each attack console.logs the message `[activePokemon] used [move]!"
-      );
+      test("An attack by the active pokemon returns the attack damage of the pokemon's move", () => {
+        const battle = new Battle(charmander, squirtle);
+        expect(battle.attack()).toBe(charmander.attackDamage);
+      });
     });
     describe("defend()", () => {
-      test.todo(
-        "Type match up: if defendingPokemon is strong against attacking pokemon, the damage is multiplied by 0.75"
-      );
-      test.todo(
-        "Type match up: if defendingPokemon is weak against attacking pokemon, the damage is multiplied by 1.25"
-      );
-      test.todo(
-        "Console.log a message stating the HP lost and whether the attack was super, or not very, effective"
-      );
-    });
-    describe("checkIfFainted()", () => {
-      test.todo("If the defending pokemon has no more HP, return true");
+      test("Type match up: if defendingPokemon is strong against attacking pokemon, the attackDamage passed is multiplied by 0.75", () => {
+        const squirtleDamage = charmander.attackDamage * 0.75;
+        const squirtleExpectedHP = squirtle.hitPoints - squirtleDamage;
+
+        const battle = new Battle(charmander, squirtle);
+        battle.defend(charmander.attackDamage);
+
+        expect(squirtle.hitPoints).toBe(squirtleExpectedHP);
+      });
+      test("Type match up: if defendingPokemon is weak against attacking pokemon, the damage is multiplied by 1.25", () => {
+        const charmanderDamage = charmander.attackDamage * 1.25;
+        const charmanderExpectedHP = charmander.hitPoints - charmanderDamage;
+
+        const battle = new Battle(squirtle, charmander);
+        battle.defend(squirtle.attackDamage);
+
+        expect(charmander.hitPoints).toBe(charmanderExpectedHP);
+      });
+      test("Console.log a message stating whether the attack was super, or not very, effective", () => {
+        console.clear;
+        const logSpy = jest.spyOn(console, "log");
+        const battle = new Battle(squirtle, charmander);
+        battle.fight();
+        expect(logSpy).toHaveBeenCalledWith("It's super effective!");
+        console.clear;
+        battle.fight();
+        expect(logSpy).toHaveBeenCalledWith("It's not very effective...");
+        logSpy.mockRestore();
+      });
     });
   });
   //describe("Battle() subclasses () => {}")
