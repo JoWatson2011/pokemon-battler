@@ -1,5 +1,5 @@
 const inquirer = require("inquirer");
-const { Battle } = require("./index.js");
+const { Battle, Pokeball } = require("./index.js");
 const getPokemon = require("./utils/getPokemon.js");
 const randomNumber = require("./utils/randomNumber.js");
 
@@ -19,7 +19,7 @@ const firstQuestions = [
   },
 ];
 
-const secondQuestions = [
+const selectMove = [
   {
     type: "list",
     name: "pokemon",
@@ -35,18 +35,22 @@ async function playGame() {
     (pokemon) => pokemon !== firstAnswers.pokemon
   );
   const rivalPokemonName =
-    pokemonChoices[randomNumber(0, pokemonChoices.length)]; // Pick a random one from array
-
+  pokemonChoices[randomNumber(0, pokemonChoices.length)]; // Pick a random one from array
+  
   console.log(`A ${rivalPokemonName} appeared!`);
-  console.log(`${firstAnswers.name} sent out ${firstAnswers.pokemon}!`);
-
-  const playerPokemon = getPokemon(firstAnswers.pokemon);
   const rivalPokemon = getPokemon(rivalPokemonName);
+  
+  const playerPokemon = getPokemon(firstAnswers.pokemon);
+  const playerPokeball = new Pokeball(playerPokemon);
+
+  playerPokeball.throw()
   const thisBattle = new Battle(playerPokemon, rivalPokemon);
 
-  console.log(thisBattle, playerPokemon, rivalPokemon);
 
-  const secondAnswers = await inquirer.prompt(secondQuestions);
+  const move = await inquirer.prompt(selectMove);
+  
+  
+  console.log(thisBattle, playerPokemon, rivalPokemon);
 
 
 }
