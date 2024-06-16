@@ -22,7 +22,7 @@ const firstQuestions = [
 const selectMove = [
   {
     type: "list",
-    name: "pokemon",
+    name: "move",
     message: "What do you want to do?",
     choices: ["Fight", "Run away", "Select Pokemon"],
   },
@@ -37,20 +37,25 @@ async function playGame() {
   const rivalPokemonName =
   pokemonChoices[randomNumber(0, pokemonChoices.length)]; // Pick a random one from array
   
-  console.log(`A ${rivalPokemonName} appeared!`);
+  console.log(`\nA ${rivalPokemonName} appeared!`);
   const rivalPokemon = getPokemon(rivalPokemonName);
   
   const playerPokemon = getPokemon(firstAnswers.pokemon);
   const playerPokeball = new Pokeball(playerPokemon);
 
   playerPokeball.throw()
+  console.log("\n")
   const thisBattle = new Battle(playerPokemon, rivalPokemon);
 
 
-  const move = await inquirer.prompt(selectMove);
+  const {move} = await inquirer.prompt(selectMove);
+  if(move === "Run away") {
+    console.log(`\n${firstAnswers.name} ran away!\n`)
+    return
+  }
   
+  if(move === "Fight") {}
   
-  console.log(thisBattle, playerPokemon, rivalPokemon);
 
 
 }
