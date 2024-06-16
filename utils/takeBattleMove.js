@@ -1,3 +1,3 @@
-takeBattleMove = () =>{
+export const takeBattleMove = (battle, playerPokemon, rivalPokemon) => {
     
-}
+};
