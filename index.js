@@ -170,7 +170,7 @@ class Battle {
     this.activePokemon = pokemon1;
     this.defendingPokemon = pokemon2;
     this.battleOver = false;
-    this.winningPokemon = {}
+    this.winningPokemon = {};
   }
 
   fight() {
