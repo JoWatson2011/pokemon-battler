@@ -108,8 +108,8 @@ class Rattata extends Normal {
 }
 
 class Pokeball {
-  constructor() {
-    this.storedPokemon = undefined;
+  constructor(pokemon) {
+    this.storedPokemon = pokemon;
   }
 
   throw(wildPokemon) {
@@ -119,7 +119,7 @@ class Pokeball {
       console.log(`You caught ${wildPokemon.name}!`);
     } else if (!this.isEmpty() && !wildPokemon) {
       // If a pokemon is stored and wasn't passed as an argument
-      console.log(`Go ${this.storedPokemon.name}`);
+      console.log(`Go, ${this.storedPokemon.name}!`);
       return this.storedPokemon;
     } else if (!this.isEmpty() && wildPokemon) {
       console.log(`Pokeball already contains ${this.contains.name}!`);
