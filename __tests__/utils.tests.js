@@ -1,5 +1,7 @@
 const getPokemon = require("../utils/getPokemon");
 const randomNumber = require("../utils/randomNumber");
+const { Trainer, Charmander, Squirtle } = require("../index.js");
+const selectNewPokemon = require("../utils/selectNewPokemon.js");
 
 describe("getPokemon()", () => {
   test("Returns undefined when not passed a valid pokemon name", () => {
@@ -36,5 +38,34 @@ describe("randomNumber()", () => {
       expect(output).toBeGreaterThanOrEqual(0);
       expect(Number.isInteger(output)).toBe(true);
     }
-  })
+  });
+});
+
+describe("selectNewPokemon()", () => {
+  test("If the trainer instance passed has only one pokemon in the pokeBelt, log a message saying there are no pokemon that can be selected and return the active pokemon", () => {
+    const logSpy = jest.spyOn(console, "log");
+
+    const charmander = new Charmander();
+    const testTrainer = new Trainer([charmander]);
+    return selectNewPokemon(testTrainer).then((res) => {
+      expect(logSpy).toHaveBeenCalledWith(
+        "No other pokemon in party to select!"
+      );
+      expect(res).toBe(charmander);
+      logSpy.mockRestore();
+    });
+  });
+  test("If the player has more than one pokemon in the belt, return the new pokemon that has been selected", () => {
+    const logSpy = jest.spyOn(console, "log");
+
+    const charmander1 = new Charmander();
+    const charmander2 = new Charmander();
+    const squirtle = new Squirtle();
+    const testTrainer = new Trainer([charmander1, charmander2, squirtle]);
+    return selectNewPokemon(testTrainer).then((res) => {
+      expect(logSpy).toHaveBeenCalledWith("Go, Squirtle!");
+      expect(res).toBe(squirtle);
+      logSpy.mockRestore();
+    });
+  });
 });
