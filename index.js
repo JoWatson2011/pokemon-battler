@@ -138,8 +138,8 @@ class Pokeball {
 }
 
 class Trainer {
-  constructor() {
-    this.pokeBelt = [];
+  constructor(pokeBelt = []) {
+    this.pokeBelt = pokeBelt;
   }
 
   catch(wildPokemon) {
